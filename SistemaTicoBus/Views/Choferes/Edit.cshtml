@@ -1,0 +1,158 @@
+﻿@model SistemaTicoBus.Web.Models.ChoferViewModel
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Editar Chofer - TicoBus 2025</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background-color: #d1d5db;
+            position: relative;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('/images/fondo-bus.jpg');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.15;
+            z-index: 1;
+        }
+
+        .logo-esquina {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+            width: 120px;
+            height: auto;
+        }
+
+        .form-wrapper {
+            position: relative;
+            z-index: 5;
+            width: 100%;
+            max-width: 560px;
+            margin: 0 auto;
+            padding: 90px 20px 40px;
+        }
+
+        .form-card {
+            background: #ffffff;
+            padding: 36px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+        }
+
+        .logo-central {
+            width: 55px;
+            margin-bottom: 10px;
+        }
+
+        .btn-ticobus {
+            background-color: #474f5e;
+            color: white;
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        .btn-ticobus:hover {
+            background-color: #353b47;
+            color: white;
+        }
+
+        .section-title {
+            color: #212529;
+            font-weight: 700;
+        }
+
+        .small-muted {
+            color: #6c757d;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <img src="/images/logo-ticobus.png" class="logo-esquina" alt="TicoBus Logo">
+
+    <div class="form-wrapper">
+        <div class="form-card">
+            <div class="text-center mb-4">
+                <img src="/images/logo-ticobus.png" class="logo-central" alt="Logo Central">
+                <h3 class="section-title m-0">Editar Chofer</h3>
+                <p class="small-muted mb-0">Actualice la información permitida del chofer.</p>
+            </div>
+
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="alert alert-danger py-2 small text-start" role="alert">
+                    <div asp-validation-summary="ModelOnly"></div>
+                </div>
+            }
+
+            <form asp-action="Edit" asp-route-id="@ViewContext.RouteData.Values["id"]" method="post">
+                @Html.AntiForgeryToken()
+
+                <div class="mb-3 text-start">
+                    <label asp-for="Identificacion" class="form-label small fw-bold text-muted mb-1">IDENTIFICACIÓN</label>
+                    <input asp-for="Identificacion" class="form-control" autocomplete="off" />
+                    <span asp-validation-for="Identificacion" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3 text-start">
+                    <label asp-for="Nombre" class="form-label small fw-bold text-muted mb-1">NOMBRE</label>
+                    <input asp-for="Nombre" class="form-control" autocomplete="off" />
+                    <span asp-validation-for="Nombre" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3 text-start">
+                    <label asp-for="Apellidos" class="form-label small fw-bold text-muted mb-1">APELLIDOS</label>
+                    <input asp-for="Apellidos" class="form-control" autocomplete="off" />
+                    <span asp-validation-for="Apellidos" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-4 text-start">
+                    <label class="form-label small fw-bold text-muted mb-1">CORREO ELECTRÓNICO</label>
+                    <input value="@Model.Correo" class="form-control" disabled />
+                    <div class="small text-muted mt-1">El correo pertenece al usuario creado y no se modifica en esta pantalla.</div>
+                </div>
+
+                <button type="submit" class="btn btn-ticobus mb-3">
+                    <i class="fa-solid fa-floppy-disk me-2"></i>Guardar cambios
+                </button>
+            </form>
+
+            <div class="text-center">
+                <a asp-action="Index" class="text-decoration-none small fw-bold text-secondary">
+                    <i class="fa-solid fa-arrow-left me-1"></i>Volver al listado
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js"></script>
+</body>
+</html>
