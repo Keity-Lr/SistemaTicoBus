@@ -25,18 +25,23 @@
             </div>
             <p class="text-xs text-gray-500">Panel de Operador</p>
         </div>
-        
+
         <nav class="flex-1 px-3 space-y-2">
             <a class="flex items-center gap-3 bg-[#e0f2f1] text-[#004d40] font-semibold rounded-lg px-3 py-2.5 transition-all" href="/Account/ChoferDashboard">
                 <span class="material-symbols-outlined">account_circle</span>
                 <span class="text-sm">Mi Perfil</span>
             </a>
-            
+
             <a class="flex items-center gap-3 text-gray-600 hover:bg-gray-100 rounded-lg px-3 py-2.5 transition-colors" href="/Pasajeros/ListadoPasajeros">
                 <span class="material-symbols-outlined">person_add</span>
                 <span class="text-sm font-medium">Registrar Pasajero</span>
             </a>
-            
+
+            <a class="flex items-center gap-3 text-gray-600 hover:bg-gray-100 rounded-lg px-3 py-2.5 transition-colors" href="/Account/ChangePassword">
+                <span class="material-symbols-outlined">lock_reset</span>
+                <span class="text-sm font-medium">Cambiar clave</span>
+            </a>
+
             <a class="flex items-center gap-3 text-gray-600 hover:bg-gray-100 rounded-lg px-3 py-2.5 transition-colors" href="#">
                 <span class="material-symbols-outlined">directions_bus</span>
                 <span class="text-sm font-medium">Mis Viajes</span>
@@ -44,7 +49,7 @@
         </nav>
 
         <div class="px-4 border-t border-gray-200 pt-4">
-            <a class="flex items-center gap-3 text-red-600 hover:bg-red-50 rounded-lg px-3 py-2 transition-colors" href="/Account/Login">
+            <a class="flex items-center gap-3 text-red-600 hover:bg-red-50 rounded-lg px-3 py-2 transition-colors" href="/Account/Logout">
                 <span class="material-symbols-outlined">logout</span>
                 <span class="text-sm font-medium">Cerrar Sesión</span>
             </a>
@@ -59,7 +64,7 @@
 
         <main class="flex-1 overflow-y-auto p-6 space-y-6">
             <div class="text-xs font-bold text-gray-400 tracking-wider">CHOFER ➔ MI PERFIL</div>
-            
+
             <div class="bg-gradient-to-r from-blue-700 to-blue-900 text-white rounded-2xl shadow-xl p-8 max-w-2xl mx-auto space-y-4">
                 <div class="flex items-center gap-4">
                     <div class="bg-white/20 p-4 rounded-full">
@@ -70,6 +75,7 @@
                         <span class="inline-block bg-teal-400 text-slate-900 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full mt-1">@Model.Rol</span>
                     </div>
                 </div>
+
                 <div class="border-t border-white/20 pt-4 text-sm font-medium grid grid-cols-2 gap-4">
                     <div>
                         <p class="text-xs text-blue-200 font-bold uppercase">Identificación</p>
@@ -79,6 +85,52 @@
                         <p class="text-xs text-blue-200 font-bold uppercase">Terminal Base</p>
                         <p class="mt-0.5">Terminal Central 7-10</p>
                     </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 max-w-4xl mx-auto overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-100">
+                    <h3 class="font-bold text-gray-800">Viajes asignados</h3>
+                    <p class="text-xs text-gray-500">Listado informativo según los viajes registrados para el chofer.</p>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="bg-gray-50 text-gray-500 uppercase text-xs">
+                            <tr>
+                                <th class="px-6 py-3 text-left">Viaje</th>
+                                <th class="px-6 py-3 text-left">Ruta</th>
+                                <th class="px-6 py-3 text-left">Unidad</th>
+                                <th class="px-6 py-3 text-left">Salida</th>
+                                <th class="px-6 py-3 text-left">Ocupación</th>
+                                <th class="px-6 py-3 text-left">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            @if (Model.Viajes != null && Model.Viajes.Any())
+                            {
+                                foreach (var viaje in Model.Viajes)
+                                {
+                                    <tr>
+                                        <td class="px-6 py-3 font-semibold">@viaje.IdViaje</td>
+                                        <td class="px-6 py-3">@viaje.Ruta</td>
+                                        <td class="px-6 py-3">@viaje.UnidadPlaca</td>
+                                        <td class="px-6 py-3">@viaje.HorarioSalida</td>
+                                        <td class="px-6 py-3">@viaje.Ocupacion</td>
+                                        <td class="px-6 py-3">@viaje.Estado</td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="6" class="px-6 py-6 text-center text-gray-500">
+                                        No hay viajes asignados para este chofer.
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </main>
