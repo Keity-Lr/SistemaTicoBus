@@ -1,0 +1,188 @@
+﻿@model IEnumerable<TicoBus.Core.Entities.Pasajero>
+
+@{
+    Layout = null;
+    ViewData["Title"] = "TicoBus - Registro de Pasajeros";
+    var pasajeroEditar = ViewBag.PasajeroEditar as TicoBus.Core.Entities.Pasajero;
+    bool esEdicion = pasajeroEditar != null;
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+</head>
+<body class="bg-[#f4f6f8] font-['Montserrat'] text-gray-900 min-h-screen flex">
+
+    <aside class="hidden md:flex flex-col h-screen w-64 bg-white border-r border-gray-200 shadow-sm py-6 shrink-0">
+        <div class="px-6 mb-8">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-[#006a62] font-bold">navigation</span>
+                <h1 class="text-xl font-bold text-gray-800">TicoBus</h1>
+            </div>
+            <p class="text-xs text-gray-500">Panel de Operador</p>
+        </div>
+        
+        <nav class="flex-1 px-3 space-y-2">
+            <a class="flex items-center gap-3 text-gray-600 hover:bg-gray-100 rounded-lg px-3 py-2.5 transition-colors" href="/Account/ChoferDashboard">
+                <span class="material-symbols-outlined">account_circle</span>
+                <span class="text-sm font-medium">Mi Perfil</span>
+            </a>
+            <a class="flex items-center gap-3 bg-[#e0f2f1] text-[#004d40] font-semibold rounded-lg px-3 py-2.5 transition-all" href="/Pasajeros/ListadoPasajeros">
+                <span class="material-symbols-outlined">person_add</span>
+                <span class="text-sm">Registrar Pasajero</span>
+            </a>
+            <a class="flex items-center gap-3 text-gray-600 hover:bg-gray-100 rounded-lg px-3 py-2.5 transition-colors" href="#">
+                <span class="material-symbols-outlined">directions_bus</span>
+                <span class="text-sm font-medium">Mis Viajes</span>
+            </a>
+        </nav>
+
+        <div class="px-4 border-t border-gray-200 pt-4">
+            <a class="flex items-center gap-3 text-red-600 hover:bg-red-50 rounded-lg px-3 py-2 transition-colors" href="/Account/Login">
+                <span class="material-symbols-outlined">logout</span>
+                <span class="text-sm font-medium">Cerrar Sesión</span>
+            </a>
+        </div>
+    </aside>
+
+    <div class="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+        <header class="bg-[#0b192c] text-white shadow-md flex justify-between items-center px-8 py-4 z-10">
+            <span class="text-lg font-bold tracking-wide">TicoBus Consola</span>
+            <div class="text-xs bg-white/10 px-3 py-1 rounded-full text-gray-200">
+                Módulo 3: Pasajeros (Relacional)
+            </div>
+        </header>
+
+        <div class="flex-1 overflow-y-auto p-6 space-y-6">
+            
+            @if (TempData["CorreoSimulado"] != null)
+            {
+                <div class="p-4 bg-blue-50 border border-blue-200 text-blue-800 text-xs rounded-xl font-mono shadow-sm">
+                    <strong>Información del Sistema:</strong> @TempData["CorreoSimulado"]
+                </div>
+            }
+
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 max-w-2xl mx-auto">
+                <div class="border-b border-gray-100 pb-3 mb-4">
+                    <h3 class="font-bold text-gray-800 text-base">
+                        @(esEdicion ? "📝 Modificar Pasajero" : "👤 Registrar Nuevo Pasajero")
+                    </h3>
+                </div>
+
+                <form action="/Pasajeros/@(esEdicion ? "EditarPasajeroGuardar" : "RegistrarPasajeroGuardar")" method="post" class="space-y-4 text-xs">
+                    @if (esEdicion)
+                    {
+                        <input type="hidden" name="idOriginal" value="@ViewBag.IdOriginal" />
+                    }
+
+                    <div>
+                        <label class="block font-bold text-gray-600 mb-1 uppercase tracking-wider">Identificación / Cédula</label>
+                        <input type="text" name="Identificacion" required placeholder="Ej: 1-1234-5678"
+                               value="@(esEdicion ? pasajeroEditar.Identificacion : "")"
+                               class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 font-medium text-gray-800" />
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block font-bold text-gray-600 mb-1 uppercase tracking-wider">Nombre</label>
+                            <input type="text" name="Nombre" required placeholder="Nombre del pasajero"
+                                   value="@(esEdicion ? pasajeroEditar.Nombre : "")"
+                                   class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 font-medium text-gray-800" />
+                        </div>
+                        <div>
+                            <label class="block font-bold text-gray-600 mb-1 uppercase tracking-wider">Apellidos</label>
+                            <input type="text" name="Apellidos" required placeholder="Apellidos del pasajero"
+                                   value="@(esEdicion ? pasajeroEditar.Apellidos : "")"
+                                   class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 font-medium text-gray-800" />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-gray-600 mb-1 uppercase tracking-wider">Correo Electrónico</label>
+                        <input type="email" name="Correo" required placeholder="correo@ejemplo.com"
+                               value="@(esEdicion ? pasajeroEditar.Correo : "")"
+                               class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 font-medium text-gray-800" />
+                    </div>
+
+                    <div class="pt-2 flex justify-end gap-3">
+                        @if (esEdicion)
+                        {
+                            <a href="/Pasajeros/ListadoPasajeros" class="px-5 py-2 border border-gray-300 text-gray-700 font-bold rounded-lg hover:bg-gray-50 transition text-sm">
+                                Cancelar
+                            </a>
+                        }
+                        <button type="submit" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow transition text-sm">
+                            @(esEdicion ? "Guardar Cambios" : "Registrar Pasajero")
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="max-w-3xl mx-auto space-y-4">
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+                    <form action="/Pasajeros/ListadoPasajeros" method="get" class="flex gap-2">
+                        <input type="text" name="buscarNombre" value="@ViewBag.Busqueda"
+                               placeholder="🔍 Buscar pasajeros guardados por nombre..."
+                               class="flex-1 px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+                        <button type="submit" class="bg-gray-800 hover:bg-gray-950 text-white font-bold text-xs px-5 py-2 rounded-lg transition">Buscar</button>
+                        @if (!string.IsNullOrEmpty(ViewBag.Busqueda as string))
+                        {
+                            <a href="/Pasajeros/ListadoPasajeros" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold text-xs px-4 py-2 rounded-lg transition flex items-center">Limpiar</a>
+                        }
+                    </form>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-gray-50 border-b border-gray-200 text-gray-500 font-bold uppercase tracking-wider">
+                                <th class="px-6 py-3.5">Identificación / Cédula</th>
+                                <th class="px-6 py-3.5">Nombre</th>
+                                <th class="px-6 py-3.5">Apellidos</th>
+                                <th class="px-6 py-3.5">Correo Electrónico</th>
+                                <th class="px-6 py-3.5 text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 text-gray-700 font-medium">
+                            @if (!Model.Any())
+                            {
+                                <tr>
+                                    <td colspan="5" class="px-6 py-8 text-center text-gray-400 font-semibold">
+                                        No hay pasajeros registrados en el sistema.
+                                    </td>
+                                </tr>
+                            }
+                            else
+                            {
+                                foreach (var p in Model)
+                                {
+                                    <tr class="hover:bg-gray-50 transition">
+                                        <td class="px-6 py-4 font-mono font-bold text-gray-900">@p.Identificacion</td>
+                                        <td class="px-6 py-4">@p.Nombre</td>
+                                        <td class="px-6 py-4">@p.Apellidos</td>
+                                        <td class="px-6 py-4 text-blue-600 font-semibold">@p.Correo</td>
+                                        <td class="px-6 py-4 text-center">
+                                            <a href="/Pasajeros/ListadoPasajeros?identificacionEditar=@p.Identificacion&buscarNombre=@ViewBag.Busqueda"
+                                                   class="inline-block bg-amber-50 hover:bg-amber-100 text-amber-700 px-3 py-1.5 rounded-md border border-amber-200 font-bold transition">
+                                                ✏️ Editar
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>

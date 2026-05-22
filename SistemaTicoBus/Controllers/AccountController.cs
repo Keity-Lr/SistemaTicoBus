@@ -159,7 +159,25 @@ namespace SistemaTicoBus.Web.Controllers
 
         public IActionResult ChoferDashboard()
         {
-            return Content("<h1>Ingresó como Usuario Chofer</h1><p>Panel de rutas asignadas y pasajeros.</p>", "text/html; charset=utf-8");
+            var model = new ChoferDashboardViewModel
+            {
+                Identificacion = "1-1111-1111",
+                NombreCompleto = "Mario Alfaro Rojas",
+                Rol = "CHOFER AUTORIZADO",
+                Viajes = new List<ViajeAsignadoDTO>
+        {
+            new ViajeAsignadoDTO
+            {
+                IdViaje = "TB-2026-0042",
+                Ruta = "San José — Liberia",
+                UnidadPlaca = "Mercedes-Benz (SJ-B1234)",
+                HorarioSalida = "08:00 AM",
+                Ocupacion = "32 / 45 Asientos",
+                Estado = "EN CURSO"
+            }
+        }
+            };
+            return View(model);
         }
 
         public IActionResult PasajeroDashboard()

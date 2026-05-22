@@ -1,0 +1,88 @@
+﻿@model SistemaTicoBus.Web.Models.ChoferDashboardViewModel
+
+@{
+    Layout = null;
+    ViewData["Title"] = "TicoBus - Perfil Chofer";
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+</head>
+<body class="bg-[#f4f6f8] font-['Montserrat'] text-gray-900 min-h-screen flex">
+
+    <aside class="hidden md:flex flex-col h-screen w-64 bg-white border-r border-gray-200 shadow-sm py-6 shrink-0">
+        <div class="px-6 mb-8">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-[#006a62] font-bold">navigation</span>
+                <h1 class="text-xl font-bold text-gray-800">TicoBus</h1>
+            </div>
+            <p class="text-xs text-gray-500">Panel de Operador</p>
+        </div>
+        
+        <nav class="flex-1 px-3 space-y-2">
+            <a class="flex items-center gap-3 bg-[#e0f2f1] text-[#004d40] font-semibold rounded-lg px-3 py-2.5 transition-all" href="/Account/ChoferDashboard">
+                <span class="material-symbols-outlined">account_circle</span>
+                <span class="text-sm">Mi Perfil</span>
+            </a>
+            
+            <a class="flex items-center gap-3 text-gray-600 hover:bg-gray-100 rounded-lg px-3 py-2.5 transition-colors" href="/Pasajeros/ListadoPasajeros">
+                <span class="material-symbols-outlined">person_add</span>
+                <span class="text-sm font-medium">Registrar Pasajero</span>
+            </a>
+            
+            <a class="flex items-center gap-3 text-gray-600 hover:bg-gray-100 rounded-lg px-3 py-2.5 transition-colors" href="#">
+                <span class="material-symbols-outlined">directions_bus</span>
+                <span class="text-sm font-medium">Mis Viajes</span>
+            </a>
+        </nav>
+
+        <div class="px-4 border-t border-gray-200 pt-4">
+            <a class="flex items-center gap-3 text-red-600 hover:bg-red-50 rounded-lg px-3 py-2 transition-colors" href="/Account/Login">
+                <span class="material-symbols-outlined">logout</span>
+                <span class="text-sm font-medium">Cerrar Sesión</span>
+            </a>
+        </div>
+    </aside>
+
+    <div class="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+        <header class="bg-[#0b192c] text-white shadow-md flex justify-between items-center px-8 py-4 z-10">
+            <span class="text-lg font-bold tracking-wide">Consola TicoBus</span>
+            <span class="text-xs bg-white/10 px-3 py-1 rounded-full">Rol: Chofer</span>
+        </header>
+
+        <main class="flex-1 overflow-y-auto p-6 space-y-6">
+            <div class="text-xs font-bold text-gray-400 tracking-wider">CHOFER ➔ MI PERFIL</div>
+            
+            <div class="bg-gradient-to-r from-blue-700 to-blue-900 text-white rounded-2xl shadow-xl p-8 max-w-2xl mx-auto space-y-4">
+                <div class="flex items-center gap-4">
+                    <div class="bg-white/20 p-4 rounded-full">
+                        <span class="material-symbols-outlined text-4xl">account_box</span>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-black tracking-tight">@Model.NombreCompleto</h2>
+                        <span class="inline-block bg-teal-400 text-slate-900 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full mt-1">@Model.Rol</span>
+                    </div>
+                </div>
+                <div class="border-t border-white/20 pt-4 text-sm font-medium grid grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-xs text-blue-200 font-bold uppercase">Identificación</p>
+                        <p class="font-mono mt-0.5">@Model.Identificacion</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-blue-200 font-bold uppercase">Terminal Base</p>
+                        <p class="mt-0.5">Terminal Central 7-10</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+</body>
+</html>

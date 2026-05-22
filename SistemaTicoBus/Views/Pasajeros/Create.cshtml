@@ -1,0 +1,55 @@
+﻿@model TicoBus.Core.Entities.Pasajero
+
+@{
+    ViewData["Title"] = "Registrar Pasajero";
+}
+
+<div class="p-6 max-w-xl mx-auto">
+    <div class="mb-6">
+        <a asp-action="ListadoPasajeros" class="text-sm text-blue-600 hover:underline flex items-center gap-1 mb-2">
+            ⬅️ Volver al listado
+        </a>
+        <h2 class="text-2xl font-bold text-gray-800">Registrar Nuevo Pasajero</h2>
+        <p class="text-sm text-gray-500">Ingrese los datos correspondientes en el orden reglamentario.</p>
+    </div>
+
+    <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100">
+        <form asp-action="Create" method="post" class="space-y-5">
+            
+            <div asp-validation-summary="ModelOnly" class="p-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg"></div>
+
+            <div>
+                <label asp-for="Identificacion" class="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-1">Identificación</label>
+                <input asp-for="Identificacion" type="text" placeholder="Ej: 1-1234-5678"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-gray-700" />
+            </div>
+
+            <div>
+                <label asp-for="Nombre" class="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-1">Nombre</label>
+                <input asp-for="Nombre" type="text" placeholder="Primer y segundo nombre"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-gray-700" />
+            </div>
+
+            <div>
+                <label asp-for="Apellidos" class="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-1">Apellidos</label>
+                <input asp-for="Apellidos" type="text" placeholder="Ambos apellidos"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-gray-700" />
+            </div>
+
+            <div>
+                <label asp-for="Correo" class="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-1">Correo Electrónico</label>
+                <input asp-for="Correo" type="email" placeholder="usuario@ejemplo.com"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-gray-700" />
+            </div>
+
+            <div class="pt-2 flex gap-3">
+                <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg shadow transition">
+                    Confirmar Registro
+                </button>
+                <a asp-action="ListadoPasajeros" class="px-5 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-700 font-medium transition text-center">
+                    Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
