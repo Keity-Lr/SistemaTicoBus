@@ -1,164 +1,251 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
-using SistemaTicoBus.Models;
 using SistemaTicoBus.Web.Models;
-using System;
+using SistemaTicoBus.Web.Services;
 
 namespace SistemaTicoBus.Web.Controllers
 {
     public class AccountController : Controller
     {
-        // Cadena de conexión directa a tu base de datos TicoBusDB
-        private readonly string _connectionString = "Server=localhost\\SQLEXPRESS;Database=TicoBusDB;Trusted_Connection=True;TrustServerCertificate=True;";
+        private readonly string _connectionString;
+        private readonly IEmailService _emailService;
 
-        // GET: /Account/Login
+        public AccountController(IConfiguration configuration, IEmailService emailService)
+        {
+            _connectionString = configuration.GetConnectionString("DefaultConnection") ?? string.Empty;
+            _emailService = emailService;
+        }
+
         [HttpGet]
         public IActionResult Login()
         {
             return View();
         }
 
-        // POST: /Account/Login
         [HttpPost]
-        public IActionResult Login(LoginViewModel model)
+        public async Task<IActionResult> Login(LoginViewModel model)
         {
-            // Validar que los campos USERNAME y PASSWORD no estén vacíos en la vista
             if (!ModelState.IsValid)
             {
                 return View(model);
             }
 
-            using (SqlConnection conn = new SqlConnection(_connectionString))
+            using (SqlConnection connection = new SqlConnection(_connectionString))
             {
-                conn.Open();
+                connection.Open();
 
-                // 1. Buscar si el usuario existe en la base de datos y traer su rol asignado
                 string query = @"
-                    SELECT u.Id, u.NombreUsuario, u.Clave, u.RolId, r.Nombre AS RolNombre, u.BloqueadoHasta, u.IntentosFallidos 
+                    SELECT 
+                        u.Id,
+                        u.NombreUsuario,
+                        u.Clave,
+                        u.Correo,
+                        r.Nombre AS RolNombre,
+                        u.BloqueadoHasta,
+                        u.IntentosFallidos
                     FROM Usuarios u
                     INNER JOIN Roles r ON u.RolId = r.Id
-                    WHERE u.NombreUsuario = @Username";
+                    WHERE u.NombreUsuario = @NombreUsuario";
 
-                SqlCommand cmd = new SqlCommand(query, conn);
-                cmd.Parameters.AddWithValue("@Username", model.Username);
-
-                using (SqlDataReader reader = cmd.ExecuteReader())
+                using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    if (reader.Read())
+                    command.Parameters.AddWithValue("@NombreUsuario", model.Username);
+
+                    using (SqlDataReader reader = command.ExecuteReader())
                     {
-                        string dbPassword = reader["Clave"].ToString();
-                        string rol = reader["RolNombre"].ToString();
-                        int userId = Convert.ToInt32(reader["Id"]);
+                        if (!reader.Read())
+                        {
+                            ModelState.AddModelError("", "Usuario o contraseña incorrectos.");
+                            return View(model);
+                        }
+
+                        int usuarioId = Convert.ToInt32(reader["Id"]);
+                        string nombreUsuario = reader["NombreUsuario"].ToString() ?? string.Empty;
+                        string claveBaseDatos = reader["Clave"].ToString() ?? string.Empty;
+                        string correo = reader["Correo"].ToString() ?? string.Empty;
+                        string rol = reader["RolNombre"].ToString() ?? string.Empty;
                         int intentosFallidos = Convert.ToInt32(reader["IntentosFallidos"]);
 
                         DateTime? bloqueadoHasta = reader["BloqueadoHasta"] == DBNull.Value
                             ? null
                             : Convert.ToDateTime(reader["BloqueadoHasta"]);
 
-                        // 2. Validar si la cuenta está bloqueada temporalmente (Módulo 1)
                         if (bloqueadoHasta.HasValue && bloqueadoHasta.Value > DateTime.Now)
                         {
-                            TimeSpan restante = bloqueadoHasta.Value - DateTime.Now;
-                            ModelState.AddModelError("", $"Cuenta bloqueada. Intente de nuevo en {restante.Minutes:00}:{restante.Seconds:00}.");
+                            DateTime fechaReintento = bloqueadoHasta.Value;
+
+                            reader.Close();
+
+                            await EnviarCorreoCuentaBloqueadaAsync(
+                                correo,
+                                nombreUsuario,
+                                fechaReintento
+                            );
+
+                            TimeSpan tiempoRestante = fechaReintento - DateTime.Now;
+
+                            ModelState.AddModelError(
+                                "",
+                                $"Cuenta bloqueada. Intente de nuevo en {tiempoRestante.Minutes:00}:{tiempoRestante.Seconds:00}."
+                            );
+
                             return View(model);
                         }
 
-                        // 3. Validar si la contraseña coincide
-                        if (dbPassword == model.Password)
+                        if (claveBaseDatos == model.Password)
                         {
-                            // Éxito: Se cierran los lectores y se restauran los intentos a 0
-                            reader.Close();
-                            ResetearIntentos(userId, conn);
-
-                            // Redirigir a la vista correspondiente según el rol del usuario logueado
-                            if (rol == "Administrador") return RedirectToAction("AdminDashboard");
-                            if (rol == "Chofer") return RedirectToAction("ChoferDashboard");
-                            if (rol == "Pasajero") return RedirectToAction("PasajeroDashboard");
-                        }
-                        else
-                        {
-                            // Falló la clave: El lector se cierra para poder actualizar los intentos en la BD
                             reader.Close();
 
-                            // Restricción: El Administrador nunca puede quedar bloqueado bajo ninguna circunstancia
-                            if (rol != "Administrador")
-                            {
-                                intentosFallidos++;
+                            ResetearIntentos(usuarioId, connection);
 
-                                // Si el Chofer o Pasajero falla la clave 2 veces consecutivas, se bloquea por 3 minutos
-                                if (intentosFallidos >= 2)
-                                {
-                                    BloquearUsuario(userId, conn);
-                                    ModelState.AddModelError("", "Demasiados intentos fallidos. Cuenta bloqueada por 3 minutos.");
-                                }
-                                else
-                                {
-                                    RegistrarIntentoFallido(userId, intentosFallidos, conn);
-                                    ModelState.AddModelError("", "Usuario o contraseña incorrectos.");
-                                }
-                            }
-                            else
+                            await EnviarCorreoInicioSesionAsync(correo, nombreUsuario);
+
+                            if (rol == "Administrador")
                             {
-                                // Si es administrador y falla, solo muestra el error común
-                                ModelState.AddModelError("", "Usuario o contraseña incorrectos.");
+                                return RedirectToAction("AdminDashboard");
                             }
+
+                            if (rol == "Chofer")
+                            {
+                                return RedirectToAction("ChoferDashboard");
+                            }
+
+                            if (rol == "Pasajero")
+                            {
+                                return RedirectToAction("PasajeroDashboard");
+                            }
+
+                            ModelState.AddModelError("", "El rol del usuario no es válido.");
                             return View(model);
                         }
-                    }
-                    else
-                    {
-                        // Si el Nombre de Usuario no existe en la base de datos
+
+                        reader.Close();
+
+                        if (rol == "Administrador")
+                        {
+                            ModelState.AddModelError("", "Usuario o contraseña incorrectos.");
+                            return View(model);
+                        }
+
+                        intentosFallidos++;
+
+                        if (intentosFallidos >= 2)
+                        {
+                            DateTime nuevaFechaBloqueo = DateTime.Now.AddMinutes(3);
+
+                            BloquearUsuario(usuarioId, nuevaFechaBloqueo, connection);
+
+                            await EnviarCorreoCuentaBloqueadaAsync(
+                                correo,
+                                nombreUsuario,
+                                nuevaFechaBloqueo
+                            );
+
+                            ModelState.AddModelError(
+                                "",
+                                "Demasiados intentos fallidos. Cuenta bloqueada por 3 minutos."
+                            );
+
+                            return View(model);
+                        }
+
+                        RegistrarIntentoFallido(usuarioId, intentosFallidos, connection);
+
                         ModelState.AddModelError("", "Usuario o contraseña incorrectos.");
+                        return View(model);
                     }
                 }
             }
-            return View(model);
         }
 
-        // --- MÉTODOS AUXILIARES PARA EL CONTROL DE BLOQUEOS (BASE DE DATOS) ---
-
-        private void RegistrarIntentoFallido(int userId, int intentos, SqlConnection conn)
+        public IActionResult Logout()
         {
-            string q = "UPDATE Usuarios SET IntentosFallidos = @Intentos WHERE Id = @Id";
-            using (SqlCommand cmd = new SqlCommand(q, conn))
+            return RedirectToAction("Login", "Account");
+        }
+
+        private async Task EnviarCorreoInicioSesionAsync(string correo, string nombreUsuario)
+        {
+            string asunto = $"Inicio de sesión — {nombreUsuario}";
+
+            string cuerpo =
+                $"Usted inició sesión el día {DateTime.Now:dd/MM/yyyy} a las {DateTime.Now:HH:mm}.";
+
+            await _emailService.EnviarCorreoAsync(correo, asunto, cuerpo);
+        }
+
+        private async Task EnviarCorreoCuentaBloqueadaAsync(
+            string correo,
+            string nombreUsuario,
+            DateTime fechaReintento)
+        {
+            string asunto = "Cuenta bloqueada";
+
+            string cuerpo =
+                $"La cuenta {nombreUsuario} está bloqueada por 3 minutos. " +
+                $"Puede reintentar el {fechaReintento:dd/MM/yyyy} a las {fechaReintento:HH:mm}.";
+
+            await _emailService.EnviarCorreoAsync(correo, asunto, cuerpo);
+        }
+
+        private void RegistrarIntentoFallido(int usuarioId, int intentosFallidos, SqlConnection connection)
+        {
+            string query = @"
+                UPDATE Usuarios
+                SET IntentosFallidos = @IntentosFallidos
+                WHERE Id = @Id";
+
+            using (SqlCommand command = new SqlCommand(query, connection))
             {
-                cmd.Parameters.AddWithValue("@Intentos", intentos);
-                cmd.Parameters.AddWithValue("@Id", userId);
-                cmd.ExecuteNonQuery();
+                command.Parameters.AddWithValue("@IntentosFallidos", intentosFallidos);
+                command.Parameters.AddWithValue("@Id", usuarioId);
+
+                command.ExecuteNonQuery();
             }
         }
 
-        private void BloquearUsuario(int userId, SqlConnection conn)
+        private void BloquearUsuario(int usuarioId, DateTime bloqueadoHasta, SqlConnection connection)
         {
-            string q = "UPDATE Usuarios SET IntentosFallidos = @Intentos, BloqueadoHasta = @BloquearHasta WHERE Id = @Id";
-            using (SqlCommand cmd = new SqlCommand(q, conn))
+            string query = @"
+                UPDATE Usuarios
+                SET 
+                    IntentosFallidos = 2,
+                    BloqueadoHasta = @BloqueadoHasta
+                WHERE Id = @Id";
+
+            using (SqlCommand command = new SqlCommand(query, connection))
             {
-                cmd.Parameters.AddWithValue("@Intentos", 2);
-                cmd.Parameters.AddWithValue("@BloquearHasta", DateTime.Now.AddMinutes(3));
-                cmd.Parameters.AddWithValue("@Id", userId);
-                cmd.ExecuteNonQuery();
+                command.Parameters.AddWithValue("@BloqueadoHasta", bloqueadoHasta);
+                command.Parameters.AddWithValue("@Id", usuarioId);
+
+                command.ExecuteNonQuery();
             }
         }
 
-        private void ResetearIntentos(int userId, SqlConnection conn)
+        private void ResetearIntentos(int usuarioId, SqlConnection connection)
         {
-            string q = "UPDATE Usuarios SET IntentosFallidos = 0, BloqueadoHasta = NULL WHERE Id = @Id";
-            using (SqlCommand cmd = new SqlCommand(q, conn))
+            string query = @"
+                UPDATE Usuarios
+                SET 
+                    IntentosFallidos = 0,
+                    BloqueadoHasta = NULL
+                WHERE Id = @Id";
+
+            using (SqlCommand command = new SqlCommand(query, connection))
             {
-                cmd.Parameters.AddWithValue("@Id", userId);
-                cmd.ExecuteNonQuery();
+                command.Parameters.AddWithValue("@Id", usuarioId);
+
+                command.ExecuteNonQuery();
             }
         }
-
-        // --- PÁGINAS DE BIENVENIDA TEMPORALES SEGÚN EL ROL DE INGRESO ---
 
         public IActionResult AdminDashboard()
         {
-            return Content("<h1>Ingresó como Administrador</h1><p>Bienvenido al panel de control total de TicoBus.</p>", "text/html; charset=utf-8");
+            return RedirectToAction("Index", "Choferes");
         }
 
         public IActionResult ChoferDashboard()
         {
+<<<<<<< Updated upstream
             var model = new ChoferDashboardViewModel
             {
                 Identificacion = "1-1111-1111",
@@ -178,12 +265,20 @@ namespace SistemaTicoBus.Web.Controllers
         }
             };
             return View(model);
+=======
+            return Content(
+                "<h1>Ingresó como Usuario Chofer</h1><p>Panel de rutas asignadas y pasajeros.</p>",
+                "text/html; charset=utf-8"
+            );
+>>>>>>> Stashed changes
         }
 
         public IActionResult PasajeroDashboard()
         {
-            return Content("<h1>Ingresó como Usuario Pasajero</h1><p>Panel de consultas y reservas de asientos.</p>", "text/html; charset=utf-8");
+            return Content(
+                "<h1>Ingresó como Usuario Pasajero</h1><p>Panel de consultas y reservas de asientos.</p>",
+                "text/html; charset=utf-8"
+            );
         }
     }
 }
-
