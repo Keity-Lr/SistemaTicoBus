@@ -3,6 +3,7 @@ using Microsoft.Data.SqlClient;
 using SistemaTicoBus.Web.Models;
 using SistemaTicoBus.Web.Services;
 using System.Data;
+using TicoBus.Infrastructure.Data;
 
 namespace SistemaTicoBus.Web.Controllers
 {
@@ -16,11 +17,13 @@ namespace SistemaTicoBus.Web.Controllers
 
         private readonly string _connectionString;
         private readonly IEmailService _emailService;
+        private readonly AppDbContext _context;
 
-        public AccountController(IConfiguration configuration, IEmailService emailService)
+        public AccountController(IConfiguration configuration, IEmailService emailService, AppDbContext context)
         {
             _connectionString = configuration.GetConnectionString("DefaultConnection") ?? string.Empty;
             _emailService = emailService;
+            _context = context; 
         }
 
         [HttpGet]
@@ -166,6 +169,8 @@ namespace SistemaTicoBus.Web.Controllers
             return RedirectToAction(nameof(ChangePassword));
         }
 
+
+
         public IActionResult Logout()
         {
             HttpContext.Session.Clear();
@@ -173,14 +178,66 @@ namespace SistemaTicoBus.Web.Controllers
             return RedirectToAction(nameof(Login));
         }
 
-        public IActionResult AdminDashboard()
+        [HttpGet]
+        public IActionResult AdminDashboard(string buscar)
         {
             if (!UsuarioTieneRol(RolAdministrador))
             {
                 return RedirectToAction(nameof(Login));
             }
 
-            return RedirectToAction("Index", "Choferes");
+            string nombre = HttpContext.Session.GetString("NombreUsuario") ?? "Administrador General";
+            ViewBag.BusquedaActual = buscar;
+
+            var queryRutas = _context.Rutas.AsQueryable();
+
+            if (!string.IsNullOrEmpty(buscar))
+            {
+                buscar = buscar.ToLower().Trim();
+                queryRutas = queryRutas.Where(r =>
+                    r.Origen.ToLower().Contains(buscar) ||
+                    r.Destino.ToLower().Contains(buscar) ||
+                    r.Nombre.ToLower().Contains(buscar)
+                );
+            }
+
+            var listaRutas = queryRutas.ToList();
+
+            var model = new AdminDashboardViewModel
+            {
+                NombreCompleto = nombre,
+                Identificacion = "ADM-001",
+                Rol = "Administrador",
+                Rutas = listaRutas
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RegistrarRuta(string Origen, string Destino, string DuracionEstimada, decimal PrecioBase)
+        {
+            var nuevaRuta = new TicoBus.Core.Entities.Ruta
+            {
+                Nombre = "Ruta Regular", 
+                Origen = Origen,
+                Destino = Destino,
+                PrecioBase = PrecioBase
+            };
+
+            if (TimeSpan.TryParse(DuracionEstimada, out TimeSpan duracion))
+            {
+                nuevaRuta.DuracionEstimada = duracion;
+            }
+            else
+            {
+                nuevaRuta.DuracionEstimada = TimeSpan.FromHours(2); 
+            }
+
+            _context.Rutas.Add(nuevaRuta);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("AdminDashboard");
         }
 
         public IActionResult ChoferDashboard()
@@ -419,6 +476,8 @@ namespace SistemaTicoBus.Web.Controllers
 
             return model;
         }
+
+
 
         private async Task EnviarCorreoInicioSesionAsync(string correo, string nombreUsuario)
         {

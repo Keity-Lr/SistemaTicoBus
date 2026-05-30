@@ -19,32 +19,42 @@
 </head>
 <body class="bg-[#f4f6f8] font-['Montserrat'] text-gray-900 min-h-screen flex">
 
-    <aside class="hidden md:flex flex-col h-screen w-64 bg-white border-r border-gray-200 shadow-sm py-6 shrink-0">
-        <div class="px-6 mb-8">
-            <div class="flex items-center gap-2">
-                <span class="material-symbols-outlined text-[#006a62] font-bold">navigation</span>
-                <h1 class="text-xl font-bold text-gray-800">TicoBus</h1>
+    <aside class="w-64 bg-white border-r border-gray-200 flex flex-col justify-between h-full py-6 shrink-0">
+        <div>
+            <div class="px-4 mb-4">
+                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider px-3">Operación</p>
             </div>
-            <p class="text-xs text-gray-500">Panel de Operador</p>
-        </div>
-        
-        <nav class="flex-1 px-3 space-y-2">
-            <a class="flex items-center gap-3 text-gray-600 hover:bg-gray-100 rounded-lg px-3 py-2.5 transition-colors" href="/Account/ChoferDashboard">
-                <span class="material-symbols-outlined">account_circle</span>
-                <span class="text-sm font-medium">Mi Perfil</span>
-            </a>
-            <a class="flex items-center gap-3 bg-[#e0f2f1] text-[#004d40] font-semibold rounded-lg px-3 py-2.5 transition-all" href="/Pasajeros/ListadoPasajeros">
-                <span class="material-symbols-outlined">person_add</span>
-                <span class="text-sm">Registrar Pasajero</span>
-            </a>
-            <a class="flex items-center gap-3 text-gray-600 hover:bg-gray-100 rounded-lg px-3 py-2.5 transition-colors" href="#">
-                <span class="material-symbols-outlined">directions_bus</span>
-                <span class="text-sm font-medium">Mis Viajes</span>
-            </a>
-        </nav>
 
-        <div class="px-4 border-t border-gray-200 pt-4">
-            <a class="flex items-center gap-3 text-red-600 hover:bg-red-50 rounded-lg px-3 py-2 transition-colors" href="/Account/Login">
+            <nav class="px-3 space-y-1">
+                <a class="flex items-center gap-3 text-gray-600 hover:bg-gray-50 rounded-xl px-4 py-3 transition-all duration-200" href="/Account/ChoferDashboard">
+                    <span class="material-symbols-outlined text-gray-400">account_circle</span>
+                    <span class="text-sm font-medium">Mi Perfil</span>
+                </a>
+
+                <a class="flex items-center gap-3 bg-[#e0f2f1] text-[#004d40] font-semibold rounded-xl px-4 py-3 transition-all duration-200" href="/Pasajeros/ListadoPasajeros">
+                    <span class="material-symbols-outlined text-[#00695c]">person_add</span>
+                    <span class="text-sm">Registrar Pasajero</span>
+                </a>
+
+                <a class="flex items-center gap-3 text-gray-600 hover:bg-gray-50 rounded-xl px-4 py-3 transition-all duration-200" href="/Rutas/Index">
+                    <span class="material-symbols-outlined text-gray-400">explore</span>
+                    <span class="text-sm font-medium">Catálogo de Rutas</span>
+                </a>
+
+                <a class="flex items-center gap-3 text-gray-600 hover:bg-gray-50 rounded-xl px-4 py-3 transition-all duration-200" href="/Account/ChangePassword">
+                    <span class="material-symbols-outlined text-gray-400">lock_reset</span>
+                    <span class="text-sm font-medium">Cambiar clave</span>
+                </a>
+
+                <a class="flex items-center gap-3 text-gray-600 hover:bg-gray-50 rounded-xl px-4 py-3 transition-all duration-200" href="#">
+                    <span class="material-symbols-outlined text-gray-400">directions_bus</span>
+                    <span class="text-sm font-medium">Mis Viajes</span>
+                </a>
+            </nav>
+        </div>
+
+        <div class="px-4 border-t border-gray-100 pt-4">
+            <a class="flex items-center gap-3 text-red-600 hover:bg-red-50 rounded-xl px-4 py-2.5 transition-colors" href="/Account/Logout">
                 <span class="material-symbols-outlined">logout</span>
                 <span class="text-sm font-medium">Cerrar Sesión</span>
             </a>

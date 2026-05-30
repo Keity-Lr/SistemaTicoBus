@@ -2,13 +2,12 @@
 @{
     Layout = null;
 }
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Iniciar Sesión - TicoBus 2025</title>
+    <title>Iniciar Sesión - TicoBus</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <style>
@@ -32,37 +31,36 @@
                     left: 0;
                     width: 100%;
                     height: 100%;
-                    background-image: url('/images/fondo-bus.jpg'); /* Asegúrate de la extensión .jpg o .png */
+                    background-image: url('/images/fondo-bus.jpg');
                     background-size: cover;
                     background-position: center;
                     opacity: 0.15;
                     z-index: 1;
                 }
 
-            .logo-esquina {
-                position: absolute;
-                top: 20px;
-                left: 20px;
-                z-index: 10;
-                width: 120px;
-                height: auto;
-            }
-
             .login-card {
                 position: relative;
                 z-index: 5;
                 background: #ffffff;
                 padding: 40px;
-                border-radius: 12px;
-                box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+                border-radius: 16px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.1);
                 width: 100%;
                 max-width: 420px;
                 text-align: center;
             }
 
-                .login-card .logo-central {
-                    width: 65px;
-                    margin-bottom: 15px;
+            .logo-container-central {
+                display: flex;
+                justify-content: center;
+                margin-bottom: 8px;
+            }
+
+                .logo-container-central img {
+                    width: 100%;
+                    max-width: 265px;
+                    height: auto;
+                    object-fit: contain;
                 }
 
             .btn-login {
@@ -81,7 +79,6 @@
                     color: white;
                 }
 
-            /* Estilo contenedor para el input de clave con ojito */
             .password-container {
                 position: relative;
             }
@@ -98,9 +95,8 @@
 </head>
 <body>
 
-    <img src="/images/logo-ticobus.png" class="logo-esquina" alt="TicoBus Logo">
-
     <div class="login-card">
+
         @if (!ViewData.ModelState.IsValid)
         {
             <div class="alert alert-danger py-2 small text-start" role="alert">
@@ -108,9 +104,11 @@
             </div>
         }
 
-        <img src="/images/logo-ticobus.png" class="logo-central" alt="Logo Central">
-        <h3 class="fw-bold text-dark m-0">TicoBus 2025</h3>
-        <p class="text-muted small mb-4">Consola de Gestión de Transporte</p>
+        <div class="logo-container-central">
+            <img src="/images/logo-ticobus.png?v=4" alt="TicoBus Logo">
+        </div>
+
+        <p class="text-muted small mb-4" style="font-size: 13px;">Gestión de Transporte</p>
 
         <form asp-action="Login" method="post">
             <div class="mb-3 text-start">
@@ -146,11 +144,9 @@
             const txtPassword = document.getElementById('txtPassword');
 
             btnToggle.addEventListener('click', function () {
-                // Cambiar entre tipo password y text
                 const type = txtPassword.getAttribute('type') === 'password' ? 'text' : 'password';
                 txtPassword.setAttribute('type', type);
-            
-                // Cambiar el icono del ojo
+
                 this.classList.toggle('fa-eye');
                 this.classList.toggle('fa-eye-slash');
             });

@@ -1,0 +1,140 @@
+﻿@model IEnumerable<TicoBus.Core.Entities.Ruta>
+@using Microsoft.AspNetCore.Http
+@{
+    Layout = null;
+    string? nombreUsuario = Context.Session.GetString("NombreUsuario") ?? "Chofer";
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Catálogo de Rutas - TicoBus Consola</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+</head>
+<body class="bg-gray-50 flex flex-col h-screen overflow-hidden">
+
+    <header class="w-full bg-[#0f172a] h-16 flex items-center justify-between px-6 border-b border-slate-800 shrink-0">
+        <div class="flex flex-col">
+            <span class="text-white font-bold text-lg tracking-wide">TicoBus</span>
+            <span class="text-slate-400 text-xs block -mt-1 font-mono tracking-tight">CONSOLA DE OPERADOR</span>
+        </div>
+
+        <div class="flex items-center gap-4 text-slate-300">
+            <div class="flex items-center gap-2 pl-4">
+                <span class="material-symbols-outlined text-slate-400">account_circle</span>
+                <span class="text-sm font-medium text-slate-200">@nombreUsuario</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex flex-1 overflow-hidden">
+
+        <aside class="w-64 bg-white border-r border-gray-200 flex flex-col justify-between h-full py-6 shrink-0">
+            <div>
+                <div class="px-4 mb-4">
+                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider px-3">Operación</p>
+                </div>
+
+                <nav class="px-3 space-y-1">
+                    <a class="flex items-center gap-3 text-gray-600 hover:bg-gray-50 rounded-xl px-4 py-3 transition-all duration-200" href="/Account/ChoferDashboard">
+                        <span class="material-symbols-outlined text-gray-400">account_circle</span>
+                        <span class="text-sm font-medium">Mi Perfil</span>
+                    </a>
+
+                    <a class="flex items-center gap-3 text-gray-600 hover:bg-gray-50 rounded-xl px-4 py-3 transition-all duration-200" href="/Pasajeros/ListadoPasajeros">
+                        <span class="material-symbols-outlined text-gray-400">person_add</span>
+                        <span class="text-sm font-medium">Registrar Pasajero</span>
+                    </a>
+
+                    <a class="flex items-center gap-3 bg-[#e0f2f1] text-[#004d40] font-semibold rounded-xl px-4 py-3 transition-all duration-200" href="/Rutas/Index">
+                        <span class="material-symbols-outlined text-[#00695c]">explore</span>
+                        <span class="text-sm">Catálogo de Rutas</span>
+                    </a>
+
+                    <a class="flex items-center gap-3 text-gray-600 hover:bg-gray-50 rounded-xl px-4 py-3 transition-all duration-200" href="/Account/ChangePassword">
+                        <span class="material-symbols-outlined text-gray-400">lock_reset</span>
+                        <span class="text-sm font-medium">Cambiar clave</span>
+                    </a>
+
+                    <a class="flex items-center gap-3 text-gray-600 hover:bg-gray-50 rounded-xl px-4 py-3 transition-all duration-200" href="#">
+                        <span class="material-symbols-outlined text-gray-400">directions_bus</span>
+                        <span class="text-sm font-medium">Mis Viajes</span>
+                    </a>
+                </nav>
+            </div>
+
+            <div class="px-4 border-t border-gray-100 pt-4">
+                <a class="flex items-center gap-3 text-red-600 hover:bg-red-50 rounded-xl px-4 py-2.5 transition-colors" href="/Account/Logout">
+                    <span class="material-symbols-outlined">logout</span>
+                    <span class="text-sm font-medium">Cerrar Sesión</span>
+                </a>
+            </div>
+        </aside>
+
+        <main class="flex-1 overflow-y-auto p-8">
+            <div class="max-w-6xl mx-auto">
+
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-teal-700">explore</span>
+                        CATÁLOGO DE RUTAS
+                    </h2>
+                </div>
+
+                <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm mb-6">
+                    <form method="get" action="/Rutas/Index" class="flex gap-3">
+                        <div class="relative flex-1">
+                            <span class="material-symbols-outlined absolute left-3 top-2.5 text-gray-400 text-xl">search</span>
+                            <input type="text" name="buscar" placeholder="Buscar rutas por nombre o destino..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" value="@Context.Request.Query["buscar"]" />
+                        </div>
+                        <button type="submit" class="bg-slate-900 text-white px-6 py-2 rounded-lg font-medium hover:bg-slate-800 transition-colors">Buscar</button>
+                    </form>
+                </div>
+
+                <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                <th class="px-6 py-4">ID/Nombre</th>
+                                <th class="px-6 py-4">Origen</th>
+                                <th class="px-6 py-4">Destino</th>
+                                <th class="px-6 py-4">Duración</th>
+                                <th class="px-6 py-4 text-right">Precio Base</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200 text-sm text-gray-700">
+                            @if (Model != null && Model.Any())
+                            {
+                                @foreach (var ruta in Model)
+                                {
+                                    <tr class="hover:bg-gray-50/50 transition-colors">
+                                        <td class="px-6 py-4 font-semibold text-gray-900">@ruta.Nombre</td>
+                                        <td class="px-6 py-4">@ruta.Origen</td>
+                                        <td class="px-6 py-4">@ruta.Destino</td>
+                                        <td class="px-6 py-4">@ruta.DuracionEstimada</td>
+                                        <td class="px-6 py-4 text-right font-medium text-teal-700">₡@ruta.PrecioBase.ToString("N0")</td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="5" class="px-6 py-8 text-center text-gray-500">
+                                        No se encontraron rutas disponibles en este momento.
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </main>
+
+    </div>
+
+</body>
+</html>
