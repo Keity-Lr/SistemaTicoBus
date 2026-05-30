@@ -1,5 +1,7 @@
 using SistemaTicoBus.Web.Models;
 using SistemaTicoBus.Web.Services;
+using TicoBus.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +14,9 @@ builder.Services.Configure<EmailSettings>(
 );
 
 builder.Services.AddScoped<IEmailService, EmailService>();
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer("Server=localhost\\SQLEXPRESS;Database=TicoBusDB;Trusted_Connection=True;TrustServerCertificate=True;"));
 
 var app = builder.Build();
 
